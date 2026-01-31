@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, ActivityIndicator } from "react-native";
 import { GraduationCap, Lock, Phone } from "lucide-react-native";
 import ScreenWrapper from "@/components/layout/screen-wrapper";
 import Button from "@/components/ui/button";
@@ -7,16 +7,94 @@ import Input from "@/components/ui/text-input";
 import { Typography } from "@/constants/typography";
 import Card from "@/components/ui/card";
 import { Colors } from "@/constants/colors";
+import { useToast } from "@/hooks/useToast";
+import { useFormValidation, hasFormErrors } from "@/hooks/useFormValidation";
+import { loginUser } from "@/services/auth/auth.service";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function LoginScreen() {
-    const [mobileNumber, setMobileNumber] = React.useState("");
-    const [password, setPassword] = React.useState("");
+    const { showToast } = useToast();
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const {
+        formValues,
+        errors,
+        touchedFields,
+        updateField,
+        validateAllFields,
+        touchField,
+        resetForm,
+    } = useFormValidation<{ mobileNumber: string; password: string }>(
+        {
+            mobileNumber: "",
+            password: "",
+        },
+        { validateOnChange: true }
+    );
+
+    const handleLoginUser = async () => {
+        const { mobileNumber, password } = formValues;
+
+        if (!mobileNumber || !password) {
+            showToast({
+                message: "Please fill in all fields",
+                type: "error",
+                position: "top",
+            });
+            return;
+        }
+
+        const isValid = validateAllFields(["mobileNumber", "password"]);
+
+        if (!isValid) {
+            showToast({
+                message: "Please fix the errors below",
+                type: "error",
+                position: "top",
+            });
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+
+            const res = await loginUser({
+                phoneNumber: formValues.mobileNumber,
+                password: formValues.password,
+            });
+
+            const token = res.token;
+
+            await useAuthStore.getState().login(token);
+
+            showToast({
+                message: "Login successful 🎉",
+                type: "success",
+                position: "top",
+            });
+
+        } catch (error: any) {
+
+            console.log('error', error)
+            showToast({
+                message:
+                    error?.response?.data?.message ||
+                    "Something went wrong. Please try again",
+                type: "error",
+                position: "top",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
 
     return (
         <ScreenWrapper keyboardAvoiding>
             <View style={styles.header}>
                 <View style={styles.logoCircle}>
-                    <GraduationCap size={48} color="#fff" strokeWidth={2} />
+                    <GraduationCap size={48} color={Colors.white} strokeWidth={2} />
                 </View>
 
                 <Text style={[Typography.heading, styles.appTitle]}>
@@ -39,18 +117,27 @@ export default function LoginScreen() {
 
                 <Input
                     placeholder="Mobile Number"
-                    value={mobileNumber}
-                    onChangeText={setMobileNumber}
+                    value={formValues.mobileNumber}
+                    onChangeText={(text) => updateField("mobileNumber", text)}
+                    onBlur={() => touchField("mobileNumber")}
                     keyboardType="phone-pad"
+                    error={
+                        touchedFields.has("mobileNumber") ? errors.mobileNumber || "" : ""
+                    }
                     leftIcon={<Phone size={20} color={Colors.textSecondary} />}
+                    maxLength={10}
                 />
 
                 <Input
                     placeholder="Password"
-                    value={password}
-                    onChangeText={setPassword}
+                    value={formValues.password}
+                    onChangeText={(text) => updateField("password", text)}
+                    onBlur={() => touchField("password")}
                     secureTextEntry
                     autoCapitalize="none"
+                    error={
+                        touchedFields.has("password") ? errors.password || "" : ""
+                    }
                     leftIcon={<Lock size={20} color={Colors.textSecondary} />}
                 />
 
@@ -60,7 +147,11 @@ export default function LoginScreen() {
                     </Text>
                 </Pressable>
 
-                <Button title="Login" onPress={() => console.log("Login pressed")} />
+                <Button
+                    title={isLoading ? "Logging in..." : "Login"}
+                    onPress={handleLoginUser}
+                    disabled={isLoading || hasFormErrors(errors) || !formValues.mobileNumber || !formValues.password}
+                />
 
                 <View style={styles.footer}>
                     <Text style={[Typography.body, styles.footerText]}>
@@ -102,7 +193,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     appTitle: {
-        color: "#fff",
+        color: Colors.white,
         marginBottom: 4,
     },
     subtitle: {
@@ -110,7 +201,7 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: Colors.white,
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
         padding: 24,
