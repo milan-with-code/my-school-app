@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/colors';
 import { Tabs } from 'expo-router';
 import { Home, BookOpen, MessageCircle, User, Bell } from "lucide-react-native";
 
@@ -6,19 +7,19 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: "#3B82F6",
-                tabBarInactiveTintColor: "#9CA3AF",
+                tabBarActiveTintColor: Colors.primary,
+                tabBarInactiveTintColor: Colors.textMuted,
                 tabBarStyle: {
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: Colors.white,
                     borderTopWidth: 1,
-                    borderTopColor: "#E5E7EB",
+                    borderTopColor: Colors.border,
                     height: 60,
                     paddingBottom: 8,
                     paddingTop: 8,
                 },
                 tabBarLabelStyle: {
                     fontSize: 12,
-                    fontWeight: "600",
+                    fontFamily: "Poppins_500Medium",
                 },
             }}
         >

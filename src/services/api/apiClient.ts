@@ -1,4 +1,5 @@
-import { getToken } from "@/utils/storage";
+import { useAuthStore } from "@/store/auth.store";
+import { getToken, removeToken } from "@/utils/storage";
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -19,10 +20,15 @@ apiClient.interceptors.request.use(async config => {
 
 apiClient.interceptors.response.use(
     response => response,
-    error => {
-        return Promise.reject(
-            error.response?.data || { message: "Network error" }
-        );
+    async error => {
+        if (
+            error.response?.status === 401 &&
+            error.response?.data?.code === "TOKEN_EXPIRED"
+        ) {
+            await removeToken();
+            useAuthStore.getState().logout();
+        }
+        return Promise.reject(error);
     }
 );
 

@@ -1,11 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { GraduationCap, Lock, Phone } from "lucide-react-native";
 import ScreenWrapper from "@/components/layout/screen-wrapper";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/text-input";
-import { Typography } from "@/constants/typography";
 import Card from "@/components/ui/card";
+import { Typography } from "@/constants/typography";
 import { Colors } from "@/constants/colors";
 import { useToast } from "@/hooks/useToast";
 import { useFormValidation, hasFormErrors } from "@/hooks/useFormValidation";
@@ -74,8 +74,6 @@ export default function LoginScreen() {
             });
 
         } catch (error: any) {
-
-            console.log('error', error)
             showToast({
                 message:
                     error?.response?.data?.message ||
@@ -85,10 +83,9 @@ export default function LoginScreen() {
             });
         } finally {
             setIsLoading(false);
+            resetForm();
         }
     };
-
-
 
     return (
         <ScreenWrapper keyboardAvoiding>
@@ -101,7 +98,7 @@ export default function LoginScreen() {
                     SchoolConnect
                 </Text>
 
-                <Text style={[Typography.body, styles.subtitle]}>
+                <Text style={[Typography.body, styles.footerText]}>
                     Parent Portal
                 </Text>
             </View>
@@ -142,7 +139,7 @@ export default function LoginScreen() {
                 />
 
                 <Pressable style={styles.forgotPassword}>
-                    <Text style={[Typography.medium, styles.forgotPasswordText]}>
+                    <Text style={[Typography.medium, styles.footerLink]}>
                         Forgot Password?
                     </Text>
                 </Pressable>
@@ -154,7 +151,7 @@ export default function LoginScreen() {
                 />
 
                 <View style={styles.footer}>
-                    <Text style={[Typography.body, styles.footerText]}>
+                    <Text style={[Typography.body, styles.footerLink]}>
                         Don't have an account?
                     </Text>
                     <Pressable>
@@ -169,7 +166,7 @@ export default function LoginScreen() {
                 <Text style={[Typography.small, styles.versionText]}>
                     Version 1.0.0
                 </Text>
-                <Text style={[Typography.small, styles.poweredText]}>
+                <Text style={[Typography.small, styles.footerText]}>
                     Powered by SchoolConnect SaaS
                 </Text>
             </View>
@@ -187,7 +184,7 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: "#3B82F6",
+        backgroundColor: Colors.primary,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 16,
@@ -195,9 +192,6 @@ const styles = StyleSheet.create({
     appTitle: {
         color: Colors.white,
         marginBottom: 4,
-    },
-    subtitle: {
-        color: "#94A3B8",
     },
     formContainer: {
         flex: 1,
@@ -212,15 +206,12 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     loginText: {
-        color: "#64748B",
+        color: Colors.textOnPrimary,
         marginBottom: 24,
     },
     forgotPassword: {
         alignSelf: "flex-end",
         marginBottom: 20,
-    },
-    forgotPasswordText: {
-        color: "#3B82F6",
     },
     footer: {
         flexDirection: "row",
@@ -229,19 +220,16 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     footerText: {
-        color: "#64748B",
+        color: Colors.textOnPrimary,
     },
     footerLink: {
-        color: "#3B82F6",
+        color: Colors.primary,
     },
     bottomInfo: {
         alignItems: "center",
         paddingVertical: 20,
     },
     versionText: {
-        color: "#94A3B8",
-    },
-    poweredText: {
-        color: "#64748B",
+        color: "#969696",
     },
 });
